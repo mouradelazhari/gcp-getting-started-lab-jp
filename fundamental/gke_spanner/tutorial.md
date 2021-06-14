@@ -1,4 +1,4 @@
-# GKE&Spanner ハンズオン(Google Kubernetes Engine)
+# Google Kubernetes Engine (GKE) と Cloud Spanner ハンズオン
 
 ## Google Cloud プロジェクトの選択
 
@@ -59,7 +59,7 @@ gcloud container --project "$GOOGLE_CLOUD_PROJECT" clusters create "cluster-1" \
 
 Kubernetes クラスタの作成には数分かかります。
 
-## [解説] 1. ハンズオンで使用するスキーマの説明
+## ハンズオンで使用するスキーマの説明
 
 今回のハンズオンでは以下のように、3 つのテーブルを利用します。これは、あるゲームの開発において、バックエンド データベースとして Cloud Spanner を使ったことを想定しており、ゲームのプレイヤー情報や、アイテム情報を管理するテーブルに相当するものを表現しています。
 
@@ -95,7 +95,7 @@ INTERLEAVE IN PARENT players ON DELETE CASCADE;
 ```
 
 
-## [演習] 2. Cloud Spanner インスタンスの作成
+## Cloud Spanner インスタンスの作成
 
 現在 Cloud Shell と Editor の画面が開かれている状態だと思いますが、[Google Cloud のコンソール](https://console.cloud.google.com/) を開いていない場合は、コンソールの画面を開いてください。
 
@@ -128,7 +128,7 @@ INTERLEAVE IN PARENT players ON DELETE CASCADE;
 
 ![](https://storage.googleapis.com/egg-resources/egg3-2/public/2-4.png)
 
-## [演習] 5. テーブルの作成
+## テーブルの作成
 
 ### **データベースの作成**
 
@@ -187,14 +187,106 @@ INTERLEAVE IN PARENT players ON DELETE CASCADE;
 
 うまくいくと、データベースが作成されると同時に 3 つのテーブルが生成されています。
 
-## [演習] 6. データの書き込み：アプリケーション
+## Cloud Spanner 接続クライアントの準備 
+
+### **Cloud Spanner に書き込みをするアプリケーションのビルド**
+
+まずはクライアント ライブラリを利用した Web アプリケーションを作成してみましょう。
+
+Cloud Shell では、今回利用する `gke_spanner` のディレクトリにいると思います。
+spanner というディレクトリがありますので、そちらに移動します。
+
+```bash
+cd spanner
+```
+
+ディレクトリの中身を確認してみましょう。
+
+```bash
+ls -la
+```
+
+`main.go` や `pkg/` という名前のファイルやディレクトリが見つかります。
+これは Cloud Shell の Editor でも確認することができます。
+
+`gke_spanner/spanner/main.go` を Editor から開いて中身を確認してみましょう。
+
+```bash
+cloudshell edit main.go
+```
+
+![](https://storage.googleapis.com/egg-resources/egg3-2/public/4-1.png)
+
+このアプリケーションは、今回作成しているゲームで、新規ユーザーを登録するためのアプリケーションです。
+実行すると Web サーバーが起動します。
+Web サーバーに HTTP リクエストを送ると、自動的にユーザー ID が採番され、Cloud Spanner の players テーブルに新規ユーザー情報を書き込みます。
+
+以下のコードが実際にその処理を行っている部分です。
+
+```go
+func (h *spanHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+        ...
+		p := NewPlayers()
+		// get player infor from POST request
+		err := GetPlayerBody(r, p)
+		if err != nil {
+			LogErrorResponse(err, w)
+			return
+		}
+		// use UUID for primary-key value
+		randomId, _ := uuid.NewRandom()
+		// insert a recode using mutation API
+		m := []*spanner.Mutation{
+			spanner.InsertOrUpdate("players", tblColumns, []interface{}{randomId.String(), p.Name, p.Level, p.Money}),
+		}
+		// apply mutation to cloud spanner instance
+		_, err = h.client.Apply(r.Context(), m)
+		if err != nil {
+			LogErrorResponse(err, w)
+			return
+		}
+		LogSuccessResponse(w, "A new Player with the ID %s has been added!\n", randomId.String())}
+        ...
+```
+
+次にこの Go 言語で書かれたソースコードをビルドしてみましょう。
+
+そして、次のコマンドでビルドをします。初回ビルド時は、依存ライブラリのダウンロードが行われるため、少し時間がかかります。
+1分程度でダウンロード及びビルドが完了します。
+
+```bash
+go build -o player
+```
+
+ビルドされたバイナリがあるか確認してみましょう。
+`player` というバイナリが作られているはずです。これで Cloud Spanner に接続して、書き込みを行うアプリケーションができました。
+
+```bash
+ls -la
+```
+
+**Appendix) バイナリをビルドせずに動かす方法**
+
+次のコマンドで、バイナリをビルドせずにアプリケーションを動かすこともできます。
+
+```bash
+go run *.go
+```
+
+
+
+## データの書き込み：アプリケーション
 
 ### **Web アプリケーションから player データの追加**
 
-先程ビルドした `player` コマンドを実行します。
+設定していなければ、GOOGLE_CLOUD_PROJECT にプロジェクト ID をセットします。
 
 ```bash
 export GOOGLE_CLOUD_PROJECT=$(gcloud config list project --format "value(core.project)")
+```
+そして、先程ビルドした `player` コマンドを実行します。
+
+```bash
 ./player
 ```
 
@@ -240,7 +332,7 @@ A new Player with the ID 78120943-5b8e-4049-acf3-b6e070d017ea has been added!
 この ID(`78120943-5b8e-4049-acf3-b6e070d017ea`) はアプリケーションによって自動生成されたユーザー ID で、データベースの観点では、player テーブルの主キーになります。
 以降の演習でも利用しますので、手元で生成された ID をメモなどに控えておきましょう。
 
-## [演習] GKE 作成完了の確認
+## GKE クラスタの作成が完了しているかの確認
 
 ### GUI で確認
 
@@ -285,7 +377,7 @@ Server Version: version.Info{Major:"1", Minor:"18+", GitVersion:"v1.18.16-gke.21
 
 ![](https://storage.googleapis.com/egg-resources/egg3-2/public/gke/1-3.png)
 
-## [演習] 2. Docker コンテナイメージの作成
+## Docker コンテナイメージの作成
 
 ### **Docker コンテナイメージのビルド**
 
@@ -351,7 +443,7 @@ Google Container Registry にコンテナイメージを追加したことで、
 
 ![](https://storage.googleapis.com/egg-resources/egg3-2/public/gke/2-3.png)
 
-## [演習] 3. Workload Identity 設定
+## Workload Identity 設定
 
 ### **Workload Identity が有効化されていることを確認**
 
@@ -423,7 +515,7 @@ kubectl annotate serviceaccount spanner-app \
   iam.gke.io/gcp-service-account=spanner-app@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com
 ```
 
-## [演習] 4. Kubernetes Deployment の作成
+## Kubernetes Deployment の作成
 
 ここからは Kubernetes クラスタ上で動かすリソースを作成していきます。
 
@@ -486,7 +578,7 @@ kubectl get pods <pod name> -o yaml
 ```
 
 
-## [演習] 5. Kubernetes Service (Discovery) の作成
+## Kubernetes Service (Discovery) の作成
 
 ### **Service を作成する**
 
@@ -618,7 +710,7 @@ kubectl describe deployments hello-node
 kubectl logs -f <pod name>
 ```
 
-## [演習] 6. Cleanup
+## Cleanup
 
 すべての演習が終わったら、リソースを削除します。
 
@@ -655,4 +747,4 @@ gcloud spanner instances delete dev-instance
 
 ## **Thank You!**
 
-以上で、今回の Google Kubernetes Engine ハンズオンは完了です。
+以上で、今回の Google Kubernetes Engine と Cloud Spanner のハンズオンは完了です。
