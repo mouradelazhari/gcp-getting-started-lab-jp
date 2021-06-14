@@ -66,6 +66,7 @@
     - VPC Subnet と VPC の削除
     - Container Registry に登録したコンテナイメージの削除
     - Owner 権限をつけた dev-key.json の削除
+	- サービスアカウントに付与したロールの取り消し
     - サービスアカウント dev-egg-sa の削除
 
 
