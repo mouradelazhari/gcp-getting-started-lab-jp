@@ -356,7 +356,8 @@ gcloud container clusters get-credentials cluster-1
 ```
 
 上記コマンドのうち次のコマンドで、Kubernetes クラスタの操作に必要な認証情報をローカル(Cloud Shell)に持ってきています。
-```
+
+```bash
 gcloud container clusters get-credentials cluster-1
 ```
 
@@ -617,8 +618,8 @@ kubectl get services
 ```
 
  * Service が通信をルーティングしている Pod(のIP) を知りたいとき
+ * endpointsリソースはServiceリソースによって自動管理されます
 ```bash
-# endpointsリソースはServiceリソースによって自動管理されます
 kubectl get endpoints
 ```
 
@@ -672,7 +673,7 @@ curl コマンドの結果、アクセスできれば、Service リソースと 
 
  * Player 新規追加(playerId はこの後、自動で採番される)
 ```bash
-curl -X POST -d '{"name": "testPlayer1", "level": 1, "money": 100}' <EXTERNAL IP>:8080/players
+curl -X POST -d '{"name": "testPlayer99", "level": 9, "money": 10000}' <EXTERNAL IP>:8080/players
 ```
 
 もし **`invalid character '\\' looking for beginning of value`** というエラーが出た場合は、curl コマンド実行時に、バックスラッシュ(\\)文字を削除して改行せずに実行してみてください。
