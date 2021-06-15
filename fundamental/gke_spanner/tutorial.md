@@ -23,7 +23,7 @@ Cloud Spanner にアクセスする Web アプリケーションを題材にし�
 
 ![](https://storage.googleapis.com/egg-resources/egg3-2/public/gke/0-1.png)
 
-## [演習] 1. Google API の有効化と Kubernetes クラスタの作成
+## Google API の有効化と Kubernetes クラスタの作成
 
 現在 Cloud Shell と Editor の画面が開かれている状態だと思いますが、[Google Cloud のコンソール](https://console.cloud.google.com/) を開いていない場合は、コンソールの画面を開いてください。
 
@@ -293,14 +293,14 @@ export GOOGLE_CLOUD_PROJECT=$(gcloud config list project --format "value(core.pr
 以下の様なログが出力されれば、Web サーバーが起動しています。
 
 ```bash
-2021/04/28 01:14:25 Defaulting to port 8080
-2021/04/28 01:14:25 Listening on port 8080
+2021/06/14 01:14:25 Defaulting to port 8080
+2021/06/14 01:14:25 Listening on port 8080
 ```
 
 次のようなログが出力された場合は `GOOGLE_CLOUD_PROJECT` の環境変数が設定されていません。
 
 ```bash
-2021/04/28 18:05:47 'GOOGLE_CLOUD_PROJECT' is empty. Set 'GOOGLE_CLOUD_PROJECT' env by 'export GOOGLE_CLOUD_PROJECT=<gcp project id>'
+2021/06/14 18:05:47 'GOOGLE_CLOUD_PROJECT' is empty. Set 'GOOGLE_CLOUD_PROJECT' env by 'export GOOGLE_CLOUD_PROJECT=<gcp project id>'
 ```
 
 環境変数を設定してから再度実行してください。
@@ -370,8 +370,8 @@ kubectl version
 次のような結果が出れば、Kubernetes Cluster と疎通できています(Client と Server それぞれでバージョンが出力されている)。
 
 ```
-Client Version: version.Info{Major:"1", Minor:"21", GitVersion:"v1.21.0", GitCommit:"cb303e613a121a29364f75cc67d3d580833a7479", GitTreeState:"clean", BuildDate:"2021-04-08T16:31:21Z", GoVersion:"go1.16.1", Compiler:"gc", Platform:"linux/amd64"}
-Server Version: version.Info{Major:"1", Minor:"18+", GitVersion:"v1.18.16-gke.2100", GitCommit:"36d0b0a39224fef7a40df3d2bc61dfd96c8c7f6a", GitTreeState:"clean", BuildDate:"2021-03-16T09:15:29Z", GoVersion:"go1.13.15b4", Compiler:"gc", Platform:"linux/amd64"}
+Client Version: version.Info{Major:"1", Minor:"21", GitVersion:"v1.21.1", GitCommit:"5e58841cce77d4bc13713ad2b91fa0d961e69192", GitTreeState:"clean", BuildDate:"2021-05-12T14:18:45Z", GoVersion:"go1.16.4", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"19+", GitVersion:"v1.19.9-gke.1900", GitCommit:"008fd38bf3dc201bebdd4fe26edf9bf87478309a", GitTreeState:"clean", BuildDate:"2021-04-14T09:22:08Z", GoVersion:"go1.15.8b5", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
 コマンド設定をしたことで、現在のシステム構成は次のようになりました。
