@@ -27,6 +27,17 @@ Cloud Spanner にアクセスする Web アプリケーションを題材にし�
 
 現在 Cloud Shell と Editor の画面が開かれている状態だと思いますが、[Google Cloud のコンソール](https://console.cloud.google.com/) を開いていない場合は、コンソールの画面を開いてください。
 
+### **利用プロジェクトを設定**
+```bash
+gcloud config set project {{project-id}}
+```
+
+GOOGLE_CLOUD_PROJECT にプロジェクト ID をセットします。
+
+```bash
+export GOOGLE_CLOUD_PROJECT=$(gcloud config list project --format "value(core.project)")
+```
+
 ### **API の有効化**
 
 次のコマンドで、ハンズオンで利用する Google API を有効化します。
@@ -384,6 +395,11 @@ Server Version: version.Info{Major:"1", Minor:"19+", GitVersion:"v1.19.9-gke.190
 
 Docker コンテナイメージを作るときは、Dockerfile を用意します。
 Dockerfile は spanner ディレクトリに格納されています。
+
+```bash
+cd ~/cloudshell_open/gcp-getting-started-lab-jp/fundamental/gke_spanner
+```
+
 ファイルの内容は次のコマンドで、Cloud Shell Editor で確認できます。
 
 ```bash
